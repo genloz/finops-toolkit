@@ -1,0 +1,180 @@
+.create-merge table FinOpsCosts (
+    RecordId:string,
+    IngestionTime:datetime,
+    SourceScope:string,
+    BillingAccountId:string,
+    BillingAccountName:string,
+    BillingCurrency:string,
+    BillingPeriodStart:datetime,
+    BillingPeriodEnd:datetime,
+    ChargePeriodStart:datetime,
+    ChargePeriodEnd:datetime,
+    ChargeCategory:string,
+    ChargeDescription:string,
+    ChargeFrequency:string,
+    ChargeSubcategory:string,
+    ConsumedQuantity:real,
+    ConsumedUnit:string,
+    ContractedCost:real,
+    EffectiveCost:real,
+    ListCost:real,
+    BilledCost:real,
+    PricingQuantity:real,
+    PricingUnit:string,
+    ProviderName:string,
+    PublisherName:string,
+    RegionName:string,
+    ResourceId:string,
+    ResourceName:string,
+    ResourceType:string,
+    ServiceCategory:string,
+    ServiceName:string,
+    SkuId:string,
+    SkuPriceId:string,
+    SubAccountId:string,
+    SubAccountName:string,
+    Tags:dynamic,
+    RawRecord:dynamic
+)
+.alter table FinOpsCosts policy retention softdelete = 3650d
+.alter table FinOpsCosts policy caching hot = 30d
+
+.create-merge table AIUsage (
+    UsageId:string,
+    IngestionTime:datetime,
+    UsageDate:datetime,
+    Provider:string,
+    Product:string,
+    TenantId:string,
+    SubscriptionId:string,
+    ResourceId:string,
+    ResourceName:string,
+    Organization:string,
+    Project:string,
+    Application:string,
+    Environment:string,
+    UserId:string,
+    AgentId:string,
+    AgentName:string,
+    Model:string,
+    ModelVersion:string,
+    Region:string,
+    UsageType:string,
+    InputTokens:long,
+    OutputTokens:long,
+    CachedTokens:long,
+    TotalTokens:long,
+    Requests:long,
+    ActiveUsers:long,
+    Seats:long,
+    CopilotCredits:real,
+    Quantity:real,
+    Unit:string,
+    Currency:string,
+    BilledCost:real,
+    EffectiveCost:real,
+    CostSource:string,
+    Tags:dynamic,
+    RawRecord:dynamic
+)
+.alter table AIUsage policy retention softdelete = 3650d
+.alter table AIUsage policy caching hot = 30d
+
+.create-merge table IngestionRuns (
+    RunId:string,
+    PipelineName:string,
+    StartedAt:datetime,
+    CompletedAt:datetime,
+    Status:string,
+    RowsRead:long,
+    RowsWritten:long,
+    Source:string,
+    ErrorCode:string,
+    ErrorMessage:string,
+    Details:dynamic
+)
+.alter table IngestionRuns policy retention softdelete = 365d
+
+.create-or-alter function with (folder = "FinOps", docstring = "Canonical FOCUS cost data") Costs() {
+    FinOpsCosts
+    | summarize arg_max(IngestionTime, *) by RecordId
+}
+
+.create-or-alter function with (folder = "AI FinOps", docstring = "Canonical AI usage and attributed spend") AIUsageNormalized() {
+    AIUsage
+    | summarize arg_max(IngestionTime, *) by UsageId
+    | extend TotalTokens = coalesce(TotalTokens, InputTokens + OutputTokens + CachedTokens)
+    | extend EffectiveCost = coalesce(EffectiveCost, BilledCost)
+}
+
+.create-or-alter function with (folder = "AI FinOps", docstring = "AI spend from usage feeds and Azure FOCUS costs") AISpend() {
+    let MeteredUsage =
+        AIUsageNormalized()
+        | where isnotnull(UsageDate)
+        | project
+            UsageDate = startofday(UsageDate),
+            Provider,
+            Product,
+            ResourceId,
+            ResourceName,
+            Organization,
+            Project,
+            Application,
+            Model,
+            UsageType,
+            Quantity,
+            Unit,
+            TotalTokens,
+            Requests,
+            CopilotCredits,
+            Currency,
+            EffectiveCost,
+            CostSource;
+    let AzureAICosts =
+        Costs()
+        | where ServiceName has_any ("OpenAI", "Cognitive Services", "Machine Learning", "Microsoft Fabric")
+            or ResourceType has_any ("cognitiveservices", "machinelearningservices")
+            or ChargeDescription has_any ("Copilot", "OpenAI", "AI")
+        | project
+            UsageDate = startofday(ChargePeriodStart),
+            Provider = "Microsoft Azure",
+            Product = ServiceName,
+            ResourceId,
+            ResourceName,
+            Organization = "",
+            Project = tostring(Tags["project"]),
+            Application = tostring(Tags["application"]),
+            Model = ChargeDescription,
+            UsageType = ChargeSubcategory,
+            Quantity = ConsumedQuantity,
+            Unit = ConsumedUnit,
+            TotalTokens = long(null),
+            Requests = long(null),
+            CopilotCredits = real(null),
+            Currency = BillingCurrency,
+            EffectiveCost,
+            CostSource = "Azure Cost Management";
+    union MeteredUsage, AzureAICosts
+}
+
+.create-or-alter function with (folder = "AI FinOps", docstring = "Daily AI spend and usage trend") AIDailyTrend() {
+    AISpend()
+    | summarize
+        EffectiveCost = sum(EffectiveCost),
+        TotalTokens = sum(TotalTokens),
+        Requests = sum(Requests),
+        CopilotCredits = sum(CopilotCredits),
+        ActiveResources = dcount(ResourceId)
+        by UsageDate, Provider, Product, Currency
+}
+
+.create-or-alter function with (folder = "AI FinOps", docstring = "AI unit economics by model") AIModelEconomics() {
+    AISpend()
+    | summarize
+        EffectiveCost = sum(EffectiveCost),
+        TotalTokens = sum(TotalTokens),
+        Requests = sum(Requests)
+        by Provider, Product, Model, Currency
+    | extend CostPer1KTokens = iff(TotalTokens > 0, EffectiveCost / TotalTokens * 1000.0, real(null))
+    | extend CostPerRequest = iff(Requests > 0, EffectiveCost / Requests, real(null))
+}

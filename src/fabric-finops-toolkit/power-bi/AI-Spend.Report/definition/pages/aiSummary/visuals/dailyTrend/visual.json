@@ -1,0 +1,51 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "dailyTrend",
+  "position": { "x": 628, "y": 198, "z": 2000, "height": 480, "width": 628, "tabOrder": 2000 },
+  "visual": {
+    "visualType": "lineChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": { "SourceRef": { "Entity": "AI Spend" } },
+                  "Property": "Usage Date"
+                }
+              },
+              "queryRef": "AI Spend.Usage Date"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": { "SourceRef": { "Entity": "AI Spend" } },
+                  "Property": "Total AI Spend"
+                }
+              },
+              "queryRef": "AI Spend.Total AI Spend"
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": { "SourceRef": { "Entity": "AI Spend" } },
+                  "Property": "Product"
+                }
+              },
+              "queryRef": "AI Spend.Product"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

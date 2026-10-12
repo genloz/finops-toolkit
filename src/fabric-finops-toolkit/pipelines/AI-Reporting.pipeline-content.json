@@ -1,0 +1,23 @@
+{
+  "properties": {
+    "description": "Extracts Microsoft Copilot, GitHub Copilot, Copilot Studio, Foundry, and Azure OpenAI usage and spend into the Fabric Eventhouse.",
+    "activities": [
+      {
+        "name": "Extract and ingest AI usage",
+        "type": "TridentNotebook",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.04:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 60,
+          "secureInput": true,
+          "secureOutput": false
+        },
+        "typeProperties": {
+          "notebookId": "__AI_NOTEBOOK_ID__",
+          "workspaceId": "__WORKSPACE_ID__"
+        }
+      }
+    ]
+  }
+}

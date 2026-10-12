@@ -1,0 +1,53 @@
+{
+  "compatibilityLevel": 1601,
+  "model": {
+    "culture": "en-US",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "sourceQueryCulture": "en-US",
+    "dataAccessOptions": {
+      "legacyRedirects": true,
+      "returnErrorValuesAsNull": true
+    },
+    "tables": [
+      {
+        "name": "Costs",
+        "columns": [
+          { "name": "Charge Date", "dataType": "dateTime", "sourceColumn": "ChargeDate", "summarizeBy": "none" },
+          { "name": "Service", "dataType": "string", "sourceColumn": "ServiceName", "summarizeBy": "none" },
+          { "name": "Resource", "dataType": "string", "sourceColumn": "ResourceName", "summarizeBy": "none" },
+          { "name": "Resource Type", "dataType": "string", "sourceColumn": "ResourceType", "summarizeBy": "none" },
+          { "name": "Subscription", "dataType": "string", "sourceColumn": "SubAccountName", "summarizeBy": "none" },
+          { "name": "Region", "dataType": "string", "sourceColumn": "RegionName", "summarizeBy": "none" },
+          { "name": "Currency", "dataType": "string", "sourceColumn": "BillingCurrency", "summarizeBy": "none" },
+          { "name": "Effective Cost", "dataType": "double", "sourceColumn": "EffectiveCost", "summarizeBy": "sum", "formatString": "#,0.00" },
+          { "name": "Billed Cost", "dataType": "double", "sourceColumn": "BilledCost", "summarizeBy": "sum", "formatString": "#,0.00" },
+          { "name": "Quantity", "dataType": "double", "sourceColumn": "ConsumedQuantity", "summarizeBy": "sum" }
+        ],
+        "measures": [
+          { "name": "Total Effective Cost", "expression": "SUM('Costs'[Effective Cost])", "formatString": "#,0.00" },
+          { "name": "Total Billed Cost", "expression": "SUM('Costs'[Billed Cost])", "formatString": "#,0.00" },
+          { "name": "Active Resources", "expression": "DISTINCTCOUNT('Costs'[Resource])", "formatString": "#,0" },
+          { "name": "Month over Month Change", "expression": "VAR CurrentCost = [Total Effective Cost] VAR PreviousCost = CALCULATE([Total Effective Cost], DATEADD('Costs'[Charge Date], -1, MONTH)) RETURN DIVIDE(CurrentCost - PreviousCost, PreviousCost)", "formatString": "0.0%;-0.0%;0.0%" }
+        ],
+        "partitions": [
+          {
+            "name": "Costs",
+            "mode": "directQuery",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = AzureDataExplorer.Contents(\"__QUERY_URI__\", \"__DATABASE_NAME__\", \"Costs() | project ChargeDate=startofday(ChargePeriodStart), ServiceName, ResourceName, ResourceType, SubAccountName, RegionName, BillingCurrency, EffectiveCost, BilledCost, ConsumedQuantity\", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])",
+                "in",
+                "    Source"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "annotations": [
+      { "name": "PBI_QueryOrder", "value": "[\"Costs\"]" }
+    ]
+  }
+}

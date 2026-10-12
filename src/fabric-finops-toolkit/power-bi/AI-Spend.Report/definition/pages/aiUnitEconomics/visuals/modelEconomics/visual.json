@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "modelEconomics",
+  "position": { "x": 24, "y": 24, "z": 0, "height": 660, "width": 1232, "tabOrder": 0 },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": { "Column": { "Expression": { "SourceRef": { "Entity": "AI Spend" } }, "Property": "Provider" } },
+              "queryRef": "AI Spend.Provider"
+            },
+            {
+              "field": { "Column": { "Expression": { "SourceRef": { "Entity": "AI Spend" } }, "Property": "Product" } },
+              "queryRef": "AI Spend.Product"
+            },
+            {
+              "field": { "Column": { "Expression": { "SourceRef": { "Entity": "AI Spend" } }, "Property": "Model" } },
+              "queryRef": "AI Spend.Model"
+            },
+            {
+              "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "AI Spend" } }, "Property": "Total AI Spend" } },
+              "queryRef": "AI Spend.Total AI Spend"
+            },
+            {
+              "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "AI Spend" } }, "Property": "Tokens Used" } },
+              "queryRef": "AI Spend.Tokens Used"
+            },
+            {
+              "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "AI Spend" } }, "Property": "Cost per 1K Tokens" } },
+              "queryRef": "AI Spend.Cost per 1K Tokens"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

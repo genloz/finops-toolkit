@@ -1,0 +1,6 @@
+{
+  "databaseType": "ReadWrite",
+  "parentEventhouseItemId": "__EVENTHOUSE_ID__",
+  "oneLakeCachingPeriod": "__CACHE_PERIOD__",
+  "oneLakeStandardStoragePeriod": "__STORAGE_PERIOD__"
+}

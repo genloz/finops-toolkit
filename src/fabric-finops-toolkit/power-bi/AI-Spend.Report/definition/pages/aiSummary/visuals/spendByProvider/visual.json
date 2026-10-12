@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "spendByProvider",
+  "position": { "x": 24, "y": 198, "z": 1000, "height": 480, "width": 580, "tabOrder": 1000 },
+  "visual": {
+    "visualType": "barChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": { "SourceRef": { "Entity": "AI Spend" } },
+                  "Property": "Provider"
+                }
+              },
+              "queryRef": "AI Spend.Provider"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": { "SourceRef": { "Entity": "AI Spend" } },
+                  "Property": "Total AI Spend"
+                }
+              },
+              "queryRef": "AI Spend.Total AI Spend"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

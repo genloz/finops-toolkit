@@ -1,0 +1,27 @@
+{
+  "workspace": {
+    "displayName": "FinOps on Fabric",
+    "capacityId": "00000000-0000-0000-0000-000000000000"
+  },
+  "eventhouse": {
+    "displayName": "FinOpsEventhouse",
+    "databaseName": "FinOps",
+    "cachePeriod": "P30D",
+    "storagePeriod": "P3650D"
+  },
+  "costManagement": {
+    "scopes": [
+      "/subscriptions/00000000-0000-0000-0000-000000000000"
+    ],
+    "lookbackDays": 45
+  },
+  "ai": {
+    "microsoftGraphEndpoint": "https://graph.microsoft.com/beta/reports/getMicrosoft365CopilotUsageUserDetail(period='D30')",
+    "githubOrganizations": [],
+    "githubTokenSecretName": "",
+    "copilotStudioUsageEndpoint": "",
+    "copilotStudioTokenSecretName": "",
+    "lookbackDays": 45
+  },
+  "keyVaultUri": ""
+}

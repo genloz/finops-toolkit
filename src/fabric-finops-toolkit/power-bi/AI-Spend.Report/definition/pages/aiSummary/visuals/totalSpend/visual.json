@@ -1,0 +1,25 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "totalSpend",
+  "position": { "x": 24, "y": 24, "z": 0, "height": 150, "width": 280, "tabOrder": 0 },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": { "SourceRef": { "Entity": "AI Spend" } },
+                  "Property": "Total AI Spend"
+                }
+              },
+              "queryRef": "AI Spend.Total AI Spend"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

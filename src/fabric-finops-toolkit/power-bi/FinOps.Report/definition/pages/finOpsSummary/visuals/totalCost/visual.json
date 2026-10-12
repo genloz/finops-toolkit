@@ -1,0 +1,20 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "totalCost",
+  "position": { "x": 24, "y": 24, "z": 0, "height": 150, "width": 280, "tabOrder": 0 },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "Costs" } }, "Property": "Total Effective Cost" } },
+              "queryRef": "Costs.Total Effective Cost"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

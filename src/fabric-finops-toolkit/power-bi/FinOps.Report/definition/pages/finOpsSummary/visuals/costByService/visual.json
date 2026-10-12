@@ -1,0 +1,28 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "costByService",
+  "position": { "x": 24, "y": 198, "z": 1000, "height": 480, "width": 1232, "tabOrder": 1000 },
+  "visual": {
+    "visualType": "barChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": { "Column": { "Expression": { "SourceRef": { "Entity": "Costs" } }, "Property": "Service" } },
+              "queryRef": "Costs.Service"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "Costs" } }, "Property": "Total Effective Cost" } },
+              "queryRef": "Costs.Total Effective Cost"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

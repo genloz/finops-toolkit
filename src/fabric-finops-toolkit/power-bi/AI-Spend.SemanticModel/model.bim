@@ -1,0 +1,63 @@
+{
+  "compatibilityLevel": 1601,
+  "model": {
+    "culture": "en-US",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "sourceQueryCulture": "en-US",
+    "dataAccessOptions": {
+      "legacyRedirects": true,
+      "returnErrorValuesAsNull": true
+    },
+    "tables": [
+      {
+        "name": "AI Spend",
+        "columns": [
+          { "name": "Usage Date", "dataType": "dateTime", "sourceColumn": "UsageDate", "summarizeBy": "none" },
+          { "name": "Provider", "dataType": "string", "sourceColumn": "Provider", "summarizeBy": "none" },
+          { "name": "Product", "dataType": "string", "sourceColumn": "Product", "summarizeBy": "none" },
+          { "name": "Resource", "dataType": "string", "sourceColumn": "ResourceName", "summarizeBy": "none" },
+          { "name": "Organization", "dataType": "string", "sourceColumn": "Organization", "summarizeBy": "none" },
+          { "name": "Project", "dataType": "string", "sourceColumn": "Project", "summarizeBy": "none" },
+          { "name": "Application", "dataType": "string", "sourceColumn": "Application", "summarizeBy": "none" },
+          { "name": "Model", "dataType": "string", "sourceColumn": "Model", "summarizeBy": "none" },
+          { "name": "Usage Type", "dataType": "string", "sourceColumn": "UsageType", "summarizeBy": "none" },
+          { "name": "Currency", "dataType": "string", "sourceColumn": "Currency", "summarizeBy": "none" },
+          { "name": "Effective Cost", "dataType": "double", "sourceColumn": "EffectiveCost", "summarizeBy": "sum", "formatString": "#,0.00" },
+          { "name": "Total Tokens", "dataType": "int64", "sourceColumn": "TotalTokens", "summarizeBy": "sum", "formatString": "#,0" },
+          { "name": "Requests", "dataType": "int64", "sourceColumn": "Requests", "summarizeBy": "sum", "formatString": "#,0" },
+          { "name": "Copilot Credits", "dataType": "double", "sourceColumn": "CopilotCredits", "summarizeBy": "sum", "formatString": "#,0.00" },
+          { "name": "Quantity", "dataType": "double", "sourceColumn": "Quantity", "summarizeBy": "sum" },
+          { "name": "Unit", "dataType": "string", "sourceColumn": "Unit", "summarizeBy": "none" },
+          { "name": "Cost Source", "dataType": "string", "sourceColumn": "CostSource", "summarizeBy": "none" }
+        ],
+        "measures": [
+          { "name": "Total AI Spend", "expression": "SUM('AI Spend'[Effective Cost])", "formatString": "#,0.00" },
+          { "name": "Tokens Used", "expression": "SUM('AI Spend'[Total Tokens])", "formatString": "#,0" },
+          { "name": "Requests Made", "expression": "SUM('AI Spend'[Requests])", "formatString": "#,0" },
+          { "name": "Total Copilot Credits", "expression": "SUM('AI Spend'[Copilot Credits])", "formatString": "#,0.00" },
+          { "name": "Cost per 1K Tokens", "expression": "DIVIDE([Total AI Spend], [Tokens Used]) * 1000", "formatString": "#,0.0000" },
+          { "name": "Cost per Request", "expression": "DIVIDE([Total AI Spend], [Requests Made])", "formatString": "#,0.0000" },
+          { "name": "AI Spend MoM", "expression": "VAR CurrentSpend = [Total AI Spend] VAR PreviousSpend = CALCULATE([Total AI Spend], DATEADD('AI Spend'[Usage Date], -1, MONTH)) RETURN DIVIDE(CurrentSpend - PreviousSpend, PreviousSpend)", "formatString": "0.0%;-0.0%;0.0%" }
+        ],
+        "partitions": [
+          {
+            "name": "AI Spend",
+            "mode": "directQuery",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = AzureDataExplorer.Contents(\"__QUERY_URI__\", \"__DATABASE_NAME__\", \"AISpend()\", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])",
+                "in",
+                "    Source"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "annotations": [
+      { "name": "PBI_QueryOrder", "value": "[\"AI Spend\"]" }
+    ]
+  }
+}
